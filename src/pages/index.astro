@@ -26,6 +26,11 @@ const {
 
 const baseUrl = import.meta.env.BASE_URL;
 const prefix = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+const ogImage =
+  thumbnail &&
+  (Astro.site
+    ? new URL(prefix + thumbnail, Astro.site).href
+    : prefix + thumbnail);
 ---
 
 <!doctype html>
@@ -41,7 +46,7 @@ const prefix = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:type" content="website" />
-    {thumbnail && <meta property="og:image" content={prefix + thumbnail} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
 
     <Font
       cssVariable="--font-noto-sans"
