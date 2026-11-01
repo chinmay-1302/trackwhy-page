@@ -28,17 +28,17 @@ import teaserSrc from "./assets/teaser.mp4";
   authors={[
     {
       name: "Chinmay Mhatre",
-      institution: "CISTUP, Indian Institute of Science",
+      institution: "CiSTUP, Indian Institute of Science",
       notes: ["*"],
     },
     {
       name: "Sankalp Gawali",
-      institution: "CISTUP, Indian Institute of Science",
+      institution: "CiSTUP, Indian Institute of Science",
       notes: ["*"],
     },
     {
       name: "Punit Rathore",
-      institution: "CISTUP and Department of CPS, Indian Institute of Science",
+      institution: "CiSTUP and Department of CPS, Indian Institute of Science",
     },
   ]}
   notes={[{ symbol: "*", text: "Equal contribution" }]}
@@ -167,7 +167,19 @@ On 100 single frames drawn before and within false-negative intervals, Qwen3-VL-
 
 ## What convention knowledge recovers
 
-A verifier who first labelled clips `no_error` completed a second pass knowing MOT20's annotation convention; 47 of 170 were reclassified as misses. The informed pass was necessarily second, so policy knowledge and order are confounded.
+A verifier made a second pass over a 170-clip sample, this time knowing the annotation convention. Of the 76 clips the verifier had labelled `no_error_visible` in the forward pass, 47 were reclassified as misses. No clip carrying any other forward label changed, and none gained `no_error_visible`.
+
+Reclassification tracks how much of the target was visible:
+
+| Forward condition | Reclassified |
+| :--- | ---: |
+| `visible_miss` / `visible_miss_truncated` | 32 / 32 |
+| `partial_occl_*` | 11 / 16 |
+| `full_occl_*` | 3 / 15 |
+| `unattributed_*` | 1 / 8 |
+| `track_drift_to_static` | 0 / 5 |
+
+Convention knowledge recovers the failure where the target was on screen and its unmarked presence went uncounted, and recovers nothing where there was nothing to see. The informed pass was necessarily second, so policy knowledge and order are confounded.
 
 ## The release
 
