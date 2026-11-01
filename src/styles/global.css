@@ -2,6 +2,7 @@
 @plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 @plugin "@tailwindcss/forms";
+@import "@fontsource-variable/noto-sans/wght.css";
 
 @custom-variant dark {
   &:where([data-theme="dark"], [data-theme="dark"] *) {
@@ -24,6 +25,7 @@ html {
 }
 
 :root {
+  --font-noto-sans: "Noto Sans Variable", sans-serif;
   --maximum-text-width: 50rem;
   --minimum-inline-margin: 1.5rem;
   --actual-inline-margin: max(

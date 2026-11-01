@@ -168,10 +168,10 @@ export function FailureDemo() {
             type="button"
             onClick={() => choose(item.value)}
             disabled={revealed}
-            className={`flex-1 rounded-full px-4 py-2.5 text-base font-medium transition ${
+            className={`min-h-11 flex-1 rounded-full px-4 py-2.5 text-base font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900 dark:focus-visible:outline-zinc-100 ${
               answer === item.value
                 ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
-                : "bg-white text-zinc-800 ring-1 ring-zinc-300 hover:bg-zinc-50 disabled:opacity-60 dark:bg-zinc-700 dark:text-zinc-100 dark:ring-zinc-600 dark:hover:bg-zinc-600"
+                : "bg-zinc-200 text-zinc-800 hover:bg-zinc-300 disabled:opacity-60 dark:bg-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-600"
             }`}
           >
             {item.label}

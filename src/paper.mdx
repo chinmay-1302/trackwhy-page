@@ -14,6 +14,7 @@ import Picture from "./components/Picture.astro";
 import FigureCard from "./components/FigureCard.astro";
 import { FailureDemo } from "./components/FailureDemo.tsx";
 import { SyncedRegimePlayer } from "./components/SyncedRegimePlayer.tsx";
+import { withBase } from "./lib/base";
 
 import figure1 from "./assets/figures/figure1_miss_blindness.png";
 import figure2 from "./assets/figures/figure2_rendering_regimes.png";
@@ -43,8 +44,8 @@ import teaserSrc from "./assets/teaser.mp4";
   notes={[{ symbol: "*", text: "Equal contribution" }]}
   links={[
     { name: "Paper", url: "https://openreview.net/pdf?id=TRJ7gFUnta", icon: "ri:file-pdf-2-line" },
-    { name: "Code", url: "https://github.com/chinmay-1302/trackwhy", icon: "ri:github-line" },
-    { name: "Data", url: "https://huggingface.co/datasets/chinmay-1302/TrackWhy", icon: "simple-icons:huggingface" },
+    { name: "Code", url: "https://github.com/chinmay-1302/trackwhy", icon: "simple-icons:github" },
+    { name: "Data", url: "https://huggingface.co/datasets/chinmay-1302/TrackWhy", icon: "huggingface" },
     { name: "BibTeX", url: "#bibtex", icon: "ri:file-copy-2-line" },
   ]}
 >
@@ -52,7 +53,7 @@ import teaserSrc from "./assets/teaser.mp4";
 </Header>
 
 <Figure>
-  <Video slot="figure" src={teaserSrc} controls={false} />
+  <Video slot="figure" src={withBase("/clips/C021.mp4")} poster={withBase("/posters/C021.jpg")} controls={false} />
   <Fragment slot="caption">TrackEval counted this as a missed detection. Most observers see nothing wrong.</Fragment>
 </Figure>
 

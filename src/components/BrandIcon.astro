@@ -1,0 +1,23 @@
+---
+import { Icon } from "astro-icon/components";
+import huggingface from "../icons/huggingface.svg?raw";
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+const isHuggingFace = name === "huggingface";
+---
+
+{
+  isHuggingFace ? (
+    <span
+      class="inline-flex size-5 shrink-0 items-center justify-center [&>svg]:size-full"
+      aria-hidden="true"
+      set:html={huggingface}
+    />
+  ) : (
+    <Icon name={name} class="size-5 shrink-0" aria-hidden="true" />
+  )
+}
