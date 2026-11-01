@@ -1,0 +1,206 @@
+---
+title: "What Counts as a Tracking Failure? Measuring Disagreement Between Metrics, Human Observers, and Vision-Language Models"
+theme: device
+favicon: favicon.svg
+description: "A standard tracking metric counted these as failures. You will not see most of them. TrackWhy measures disagreement between metrics, human observers, and vision–language models on 284 MOT20 tracker-failure clips."
+thumbnail: social.png
+---
+
+import Header from "./components/Header.astro";
+import Video from "./components/Video.astro";
+import HighlightedSection from "./components/HighlightedSection.astro";
+import Figure from "./components/Figure.astro";
+import Picture from "./components/Picture.astro";
+import FigureCard from "./components/FigureCard.astro";
+import { FailureDemo } from "./components/FailureDemo.tsx";
+import { SyncedRegimePlayer } from "./components/SyncedRegimePlayer.tsx";
+
+import figure1 from "./assets/figures/figure1_miss_blindness.png";
+import figure2 from "./assets/figures/figure2_rendering_regimes.png";
+import figure3 from "./assets/figures/figure3_detection_by_duration.png";
+import figure4 from "./assets/figures/figure4_standee.png";
+import teaserSrc from "./assets/teaser.mp4";
+
+<Header
+  title="What Counts as a Tracking Failure?"
+  conference="VLM4RWD @ NeurIPS 2026"
+  authors={[
+    {
+      name: "Chinmay Mhatre",
+      institution: "CISTUP, Indian Institute of Science",
+      notes: ["*"],
+    },
+    {
+      name: "Sankalp Gawali",
+      institution: "CISTUP, Indian Institute of Science",
+      notes: ["*"],
+    },
+    {
+      name: "Punit Rathore",
+      institution: "CISTUP and Department of CPS, Indian Institute of Science",
+    },
+  ]}
+  notes={[{ symbol: "*", text: "Equal contribution" }]}
+  links={[
+    { name: "Paper", url: "https://openreview.net/pdf?id=TRJ7gFUnta", icon: "ri:file-pdf-2-line" },
+    { name: "Code", url: "https://github.com/chinmay-1302/trackwhy", icon: "ri:github-line" },
+    { name: "Data", url: "https://huggingface.co/datasets/chinmay-1302/TrackWhy", icon: "simple-icons:huggingface" },
+    { name: "BibTeX", url: "#bibtex", icon: "ri:file-copy-2-line" },
+  ]}
+>
+  <Video slot="background" src={teaserSrc} controls={false} />
+</Header>
+
+<Figure>
+  <Video slot="figure" src={teaserSrc} controls={false} />
+  <Fragment slot="caption">TrackEval counted this as a missed detection. Most observers see nothing wrong.</Fragment>
+</Figure>
+
+<HighlightedSection>
+
+## TL;DR
+
+- A rule-based attributor, human observers, and four vision–language models disagree systematically about what caused the same 284 tracker failures.
+- Two annotators independently labelled 41% and 44% of clips in our stratified corpus as showing **no visible error** — an observability gap between what a metric counts and what an observer can perceive.
+- MOT20's own annotations explain 22 of 282 apparent visible misses; the rest trace to six classes of annotation contamination.
+- The best model reaches κ = 0.144, confined entirely to identity changes. Across four models and twenty conditions, recall on missed detections never exceeds 2.8%.
+
+</HighlightedSection>
+
+## Can you spot the failure?
+
+A supervision-free clip plays with the tracker's own boxes and numeric IDs. Say whether you see a missed detection, an identity change, or nothing wrong. The reveal then plays the ground-truth-informed rendering of the same clip beside it.
+
+<FailureDemo client:visible />
+
+## The observability gap
+
+Two annotators independently labelled 41% and 44% of clips in our stratified corpus as showing no visible error. Those rates are measured over a corpus stratified at roughly 30 clips per condition category; they are not an estimate of how often tracking failures go unobserved in MOT20 at large.
+
+Two mechanisms account for the gap. Duration: where the tracker held a box on the target before the failure, `no_error_visible` declines from 68%/58% at three frames to 4%/7% above one hundred. Entry: of the 90 clips where the tracker held no box before the failure, 70 are entry events, and there the profile does not decline. MOT20 annotates a pedestrian from the instant of entry, at a median height of 29 px against an empirical detection floor of 59–113 px.
+
+<Figure>
+  <FigureCard slot="figure">
+    <Picture src={figure3} alt="Line plot of no_error_visible rate against failure duration for three human observers and Qwen3.8-27B. Human rates fall as duration grows; the model curve is flat." />
+  </FigureCard>
+  <Fragment slot="caption">Rate of `no_error_visible` responses by failure duration. Three human observers decline from 68%/58% at three frames to 4%/7% above one hundred; Qwen3.8-27B under ground-truth-informed rendering does not vary. Wilson 95% intervals.</Fragment>
+</Figure>
+
+## What the annotations explain
+
+282 events are apparent visible misses: the target carries visibility ≥ 0.8 and no tracker box. Twenty-two survive attribution. Visibility encodes occlusion by annotated objects but not by unannotated scene structure, and it does not encode truncation, so a pedestrian 60% outside the frame can carry visibility 1.00.
+
+| Stage | Events |
+| :--- | ---: |
+| Apparent visible miss (raw) | 282 |
+| − within 40 px of unannotated static structure | −12 |
+| − truncated by the frame boundary | −205 |
+| − sub-3-frame flicker | −37 |
+| − localisation drift below IoU 0.5 | −6 |
+| Visible miss (final) | **22** |
+
+Six contamination classes account for the rest of the cascade, plus two matching failures the visibility field cannot represent:
+
+- unannotated static structure
+- truncation at the frame boundary
+- one- and two-frame flicker
+- localisation drift below IoU 0.5
+- a stationary standee credited against seven ground-truth identities
+- crowd-class frames that count a failure without identifying the missed individual
+
+<Figure>
+  <FigureCard slot="figure">
+    <Picture src={figure4} alt="Illustration of a stationary standee in MOT20-01 whose false-positive box is matched to several ground-truth identities as pedestrians pass through the region." />
+  </FigureCard>
+  <Fragment slot="caption">A stationary false positive beside a standee in MOT20-01 is matched to seven ground-truth identities across 258 frames. The box is correctly matched under the metric and carries no signal in the visibility field.</Fragment>
+</Figure>
+
+## Two renderings of the same failure
+
+The ground-truth-informed highlight re-anchors to the matched track. The supervision-free highlight is pinned to one raw tracker ID and never re-anchors. Only the second rendering is available to someone without ground truth, so it is the practitioner-relevant one.
+
+<SyncedRegimePlayer
+  client:visible
+  supervisionFree="/clips/C001.mp4"
+  groundTruth="/clips/C001_gt.mp4"
+  poster="/posters/C001.jpg"
+  alt="The same identity-change clip under both renderings. After the switch, the supervision-free highlight disappears; the ground-truth-informed highlight re-anchors to the new tracker ID."
+/>
+
+<Figure>
+  <FigureCard slot="figure">
+    <Picture src={figure2} alt="Diagram of the two rendering regimes: a supervision-free highlight pinned to one tracker ID, and a ground-truth-informed highlight that re-anchors after an identity change." />
+  </FigureCard>
+  <Fragment slot="caption">At an identity change the two regimes diverge. Ground-truth-informed rendering follows the physical person; supervision-free rendering ends with the original tracker ID.</Fragment>
+</Figure>
+
+## Can a VLM diagnose it?
+
+Four models saw the same clips. The strongest result is Qwen3.8-27B under supervision-free rendering: κ = 0.144, confined entirely to identity changes. Across four models and twenty conditions, recall on missed detections never exceeds 2.8%.
+
+<div class="not-prose my-6 grid gap-3 sm:grid-cols-3">
+  <div class="rounded-xl bg-zinc-100 p-4 text-center dark:bg-zinc-800">
+    <div class="text-3xl font-medium">0.144</div>
+    <div class="text-sm text-zinc-600 dark:text-zinc-300">Best κ, Qwen3.8-27B</div>
+  </div>
+  <div class="rounded-xl bg-zinc-100 p-4 text-center dark:bg-zinc-800">
+    <div class="text-3xl font-medium">2.8%</div>
+    <div class="text-sm text-zinc-600 dark:text-zinc-300">Miss-recall ceiling</div>
+  </div>
+  <div class="rounded-xl bg-zinc-100 p-4 text-center dark:bg-zinc-800">
+    <div class="text-3xl font-medium">4 × 20</div>
+    <div class="text-sm text-zinc-600 dark:text-zinc-300">Models × conditions</div>
+  </div>
+</div>
+
+<Figure>
+  <FigureCard slot="figure">
+    <Picture src={figure1} alt="Bar chart of detection rate by failure class under supervision-free rendering. Human observers detect misses; Qwen3.8-27B does not, while its identity-change recall sits near the human interval." />
+  </FigureCard>
+  <Fragment slot="caption">Detection rate by failure class under supervision-free rendering. Human bars are the rate at which a clip was flagged as containing any failure; the model bar is exact-class recall. Wilson 95% intervals on the human bars; note the difference in n.</Fragment>
+</Figure>
+
+## Why not?
+
+On 100 single frames drawn before and within false-negative intervals, Qwen3-VL-8B detects the highlight at 93/100. Event-centred sampling that guarantees eight frames inside the failure window leaves the unbroken-track rate at 0.950, against 0.947 under uniform sampling. Forty rendering conditions, including a ground-truth overlay, produce no condition that clears its selection-corrected null.
+
+## What convention knowledge recovers
+
+A verifier who first labelled clips `no_error` completed a second pass knowing MOT20's annotation convention; 47 of 170 were reclassified as misses. The informed pass was necessarily second, so policy knowledge and order are confounded.
+
+## The release
+
+| Contents | Where | Licence |
+| :--- | :--- | :--- |
+| Code, annotations, model outputs | [github.com/chinmay-1302/trackwhy](https://github.com/chinmay-1302/trackwhy) | MIT / CC BY 4.0 |
+| Rendered clips (3.6 GB) | [hf.co/datasets/chinmay-1302/TrackWhy](https://huggingface.co/datasets/chinmay-1302/TrackWhy) | CC BY-NC-SA 3.0 |
+
+```bash
+hf download chinmay-1302/TrackWhy --repo-type dataset --local-dir trackwhy-clips
+git clone https://github.com/chinmay-1302/trackwhy
+```
+
+If you use this release, cite the paper [@mhatre2026what] and MOT20 [@dendorfer2020mot20]. The clips are derivative works of MOT20 and carry its non-commercial ShareAlike terms.
+
+## Citation
+
+<div id="bibtex" />
+
+```bibtex
+@inproceedings{
+	mhatre2026what,
+	title={What Counts as a Tracking Failure? Measuring Disagreement Between Metrics, Human Observers, and Vision-Language Models},
+	author={Chinmay Mhatre and Sankalp Gawali and Punit Rathore},
+	booktitle={Grounded and Faithful Vision-Language Models for Real-World Deployment 2026},
+	year={2026},
+	url={https://openreview.net/forum?id=TRJ7gFUnta}
+}
+```
+
+## Acknowledgements
+
+We thank Aumkesh Chaudhary and Syed Salahuddin Quadri for their work annotating the clip corpus. This page is built from [Roman Hauksson-Neill's academic project page template](https://github.com/RomanHauksson/academic-project-astro-template), CC BY-SA 4.0.
+
+## Bibliography
+
+[^ref]
